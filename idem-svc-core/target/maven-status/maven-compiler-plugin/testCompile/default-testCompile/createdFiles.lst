@@ -1,0 +1,3 @@
+com/cloudnative/idem/core/handler/AbstractIdempotentExecuteHandlerTest$TestIdempotentHandler.class
+com/cloudnative/idem/core/IdempotentTokenServiceTest.class
+com/cloudnative/idem/core/handler/AbstractIdempotentExecuteHandlerTest.class
