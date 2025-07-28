@@ -5,15 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.cloudnative</groupId>
-    <artifactId>idempotent-svc</artifactId>
+    <artifactId>idempotent-toolkit</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>idem-svc-api</module>
-        <module>idem-svc-core</module>
-        <module>http</module>
-        <module>activemq</module>
-        <module>examples</module>
+        <module>idm-sdk</module>
+        <module>idm-apps</module>
+        <module>idm-sdk/idm-facade</module>
+        <module>idm-sdk/idm-core</module>
+        <module>idm-demo</module>
     </modules>
 
     <properties>
@@ -26,23 +26,6 @@
         <fastjson2.version>2.0.36</fastjson2.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-    </dependencies>
 
     <dependencyManagement>
         <dependencies>
@@ -74,6 +57,13 @@
         </dependencies>
     </dependencyManagement>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -87,5 +77,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

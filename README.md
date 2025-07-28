@@ -1,186 +1,173 @@
-# Idempotency Toolkit for HTTP, MQ, and DB Operations
+## 📦 Idempotency Toolkit
 
-This project provides a modular, pluggable idempotency toolkit that supports various operational modes such as HTTP
-APIs, Message Queue consumers, and database-driven actions. It leverages Redis for idempotent state tracking and
-includes integrated monitoring, deployment automation, and CI/CD pipelines.
+A modular, pluggable **idempotency toolkit** for ensuring exactly-once execution across **HTTP APIs**, **message queues**, and **database operations**. Built with **Spring Boot**, **Redis**, and **AOP**, and supports monitoring, CI/CD, and containerized deployments.
 
-## Project Structure Overview
+---
 
-```text
-idem-toolkit/
-├── idem-sdk/                   # Core SDK modules
-│   ├── idem-svc-api/          # Public annotations, interfaces
-│   └── idem-svc-core/         # AOP and Redis-based idempotency implementation
+### 🗂️ Project Structure
+
+```
+idempotent-toolkit/
+├── idm-sdk/                     # SDK modules
+│   ├── idm-facade/             # Public annotations and shared interfaces
+│   └── idm-core/               # Core AOP logic and Redis-backed idempotency handler
 │
-├── applications/              # Scenario-specific applications
-│   ├── http-idem-app/         # REST API-based idempotent interface
-│   ├── activemq-idem-app/     # ActiveMQ-based consumer with idempotency
-│   ├── kafka-idem-app/        # (Optional) Kafka-based example
-│   └── examples/              # Combined example for local development
+├── idm-apps/                   # Use-case applications
+│   ├── http/                  # REST-based idempotent APIs
+│   ├── mq/                    # MQ consumers with idempotency (e.g. ActiveMQ)
+│   └── db/                    # (Optional) DB-related use cases
 │
-├── deployment/                # Deployment configurations
-│   ├── docker-compose/        # Local test stack
+├── idm-demo/                   # Combined local runnable example (HTTP + MQ)
+│
+├── deployment/                 # Deployment assets
+│   ├── docker-compose/        # Local dev environment
 │   ├── k8s/                   # Kubernetes manifests
-│   └── terraform/             # AWS infrastructure provisioning
+│   └── terraform/             # Infrastructure provisioning
 │
-├── cicd/                      # Jenkins pipeline and GitHub Actions
-│   ├── Jenkinsfile            # Jenkins declarative pipeline
-│   ├── github-actions/        # Optional GitHub Actions workflows
-│   └── scripts/               # Build & deployment scripts
+├── cicd/                       # CI/CD automation
+│   ├── Jenkinsfile            # Jenkins pipeline
+│   ├── github-actions/        # GitHub Actions workflows
+│   └── scripts/               # Build/test/deploy scripts
 │
-├── monitoring/                # Prometheus + Grafana dashboards
-│   ├── prometheus/            # Prometheus config and scrape targets
-│   ├── grafana/               # Dashboard JSON templates
-│   └── alerting/              # Example Alertmanager rules
+├── monitoring/                 # Observability stack
+│   ├── prometheus/           # Metrics collection
+│   ├── grafana/              # Dashboards
+│   └── alerting/             # Alertmanager configs
 └── README.md
 ```
 
-## Idempotency Workflow Design
+---
 
-### Goals
+### ⚙️ Core Concepts
 
-- Ensure exactly-once execution for distributed operations across HTTP, MQ, and Database interaction layers.
-- Support reprocessing and deduplicate logic with retry and DLQ strategies.
-- Centralize idempotent control with `@Idempotent` annotation and Redis-backed token store.
+#### ✅ `@Idempotent` Annotation
 
-### General Architecture
-
-![](todo)
-
-## Core Components
-
-- `@Idempotent`: Marks methods requiring idempotency control
-- IdempotentAspect: AOP that wraps execution with pre/post hooks
-- AbstractIdempotentExecuteHandler: Common handler interface for any protocol type
-- RedisIdempotentStore: Token store to presist and verify request uniqueness
-
-## Typical Flow (e.g., MQ, DB or HTTP Request)
-
-- Operation trigger (message received, API called, job executed)
-- Aspect intercepts and checks Redis for uniqueness key
-- If key exists(in Redis Store):
-    - Skip execution or raise `RepeatConsumptionException`
-- If key missing:
-    - Proceed to logic
-    - Store token to Redis Store
-- Post-processing clears or confirms token depending on outcome.
-
-## Integration Test: Examples for Message Consumer
-
-In `activemq-idem-app` module:
+Used to declare methods that require idempotency control. Supports multiple scenes and strategies:
 
 ```java
-import org.springframework.stereotype.Component;
-
-@Component
-public class SomeConsumerService {
-    @Idempotent(scene = "ORDER", type = Idempotent.Type.MQ)
-    public void process(String payload) {
-        // impl logic here 
-    }
+@Idempotent(
+    key = "#request.orderId",
+    type = IdempotentTypeEnum.SPEL,
+    scene = IdempotentSceneEnum.HTTP
+)
+public void handleOrder(Request request) {
+    // business logic
 }
+```
 
-// ---
+---
 
-@SpringBootTest
-@ActiveProfiles("test")
-public class ActiveMQIdempotentIT {
-    @Autowired
-    private JmsTemplate jmsTemplate;
+### 🔁 Execution Flow
 
-    @Autowired
-    private SomeConsumerService service;
+1. Operation triggered (HTTP request, MQ message, etc.)
+2. AOP intercepts method via `IdempotentAspect`
+3. Redis key is generated from the method input (based on `@Idempotent.key`)
+4. If key exists → reject/skip execution
+5. If key absent → execute method and store key in Redis
+6. Optional: auto-expire Redis key or remove it post-success
 
-    @Test
-    public void testIdempotentMessageHandling() throws Exception {
-        String payload = "{\"orderId\":\"123\"}";
-        jmsTemplate.convertAndSend("idem.mq.test.queue", payload);
+---
 
-        Thread.sleep(100);
+### 🧪 Integration Test Example (MQ)
 
-        // Send again 
-        jmsTemplate.convertAndSend("idem.mq.test.queue", payload);
-
-        // Should only be processed once
-        verify(service, times(1)).process(any());
+```java
+@Component
+public class OrderConsumer {
+    @Idempotent(scene = IdempotentSceneEnum.MQ, type = IdempotentTypeEnum.SPEL, key = "#payload.orderId")
+    public void process(String payload) {
+        // idempotent message handling
     }
 }
 ```
 
-## Benchmark Plan (JMH or Custom Timer)
+```java
+@SpringBootTest
+@ActiveProfiles("test")
+class ActiveMQIdempotentIT {
+    @Autowired JmsTemplate jmsTemplate;
+    @Autowired OrderConsumer consumer;
 
-### JMH Sample
+    @Test
+    void testIdempotency() throws InterruptedException {
+        String payload = "{\"orderId\":\"123\"}";
+        jmsTemplate.convertAndSend("queue.idem.test", payload);
+        jmsTemplate.convertAndSend("queue.idem.test", payload); // duplicated
+
+        Thread.sleep(500);
+        verify(consumer, times(1)).process(any());
+    }
+}
+```
+
+---
+
+### 📊 Performance Benchmark
+
+Using JMH:
 
 ```java
-
 @BenchmarkMode(Mode.Throughput)
-@Warmup(iterations = 2)
-@Measurement(iterations = 5)
 @State(Scope.Thread)
 public class IdempotentBenchmark {
-
     private IdempotentExecuteHandler handler;
 
-    @Setup
-    public void setup() {
+    @Setup public void setup() {
         handler = new RedisIdempotentExecuteHandler();
     }
 
     @Benchmark
     public void testExecute() throws Throwable {
-        ProceedingJoinPoint joinPoint = ...;
         handler.execute(joinPoint, mock(Idempotent.class));
     }
 }
 ```
 
-### StopWatch + actuator metrics in local env:
+---
 
-```java
-import org.springframework.util.StopWatch;
+### 🚀 CI/CD Pipeline
 
-StopWatch sw = new StopWatch(); 
-sw.
+#### Jenkins Flow
 
-start(); 
-handler.
+1. Build all modules under `idm-sdk` and `idm-apps`
+2. Run unit + integration tests
+3. Build Docker images
+4. Apply Terraform (AWS provisioning)
+5. Deploy via Helm or `kubectl`
 
-execute(joinPoint, idempotent); 
-sw.
+#### GitHub Actions *(optional)*
 
-stop();
-System.out.
+* Auto-test + build on PR
+* Deploy snapshot builds to container registry
 
-println("Time taken: "+sw.getTotalTimeMillis()); 
+---
+
+### 🐳 Local Testing
+
+```bash
+cd deployment/docker-compose
+docker-compose up --build
 ```
 
-## Deployment & CI/CD
+Includes:
 
-### Jenkins pipeline:
+* Redis
+* ActiveMQ
+* HTTP + MQ apps
 
-- Build all `*-app` modules
-- Run unit & integration tests
-- Build Docker images
-- Apply `terraform` to provision AWS resources (RDS, EKS, SQS)
-- Deploy via `kubectl` or Helm
+Accessible via:
 
-### Local Testing with Docker Compose:
+* `localhost:8080` (HTTP)
+* `localhost:8161` (ActiveMQ Console)
 
-```shell
-cd deployment/docker-compose 
-docker-compose up --build 
-```
+---
 
-Includes Redis, ActiveMQ, HTTP Idempotent Apps.
+### 📈 Observability
 
-### K8S + Monitoring
-
-```shell
+```bash
 kubectl apply -f deployment/k8s/
-open http://<grafana-ip>:3000
 ```
 
-- Prometheus scrapes metrics from each `*-app`
-- Grafana dashboards auto-imported from `monitoring/grafana`
-- Redis, MQ brokers, and apps are automatically exposed via NodePort or Ingress 
+* **Grafana**: `http://<grafana-ip>:3000`
+* **Prometheus** scrapes metrics from all `*idem-app` services
+* Redis/MQ exposed via NodePort
 
