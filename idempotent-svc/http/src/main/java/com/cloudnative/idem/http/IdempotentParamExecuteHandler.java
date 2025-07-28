@@ -9,11 +9,23 @@ import org.redisson.api.RedissonClient;
 @RequiredArgsConstructor
 public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHandler {
     private final RedissonClient redissionClient;
+    private final static String LOCK = "lock:param:restAPI";
 
     @Override
     protected IdempotentParamWrapper buildWrapper(ProceedingJoinPoint joinPoint) {
-        return null;
+        String lockKey = String.format("idempotent:path:%s:currentUserId:%s:md5:%s",
+                getServletPath(),
+                getCurrentUser(),
+                calcArgsMD5(joinPoint));
+        return IdempotentParamWrapper.builder().lockKey(lockKey).joinPoint(joinPoint).build();
     }
+
+    private String getServletPath() {
+        String ret;
+        return ret;
+    }
+
+
 
     @Override
     public void handler(IdempotentParamWrapper wrapper) {
