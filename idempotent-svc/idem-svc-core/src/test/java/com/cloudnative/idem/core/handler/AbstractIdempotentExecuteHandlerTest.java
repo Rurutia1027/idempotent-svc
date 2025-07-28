@@ -38,15 +38,13 @@ public class AbstractIdempotentExecuteHandlerTest {
         // Arrange
         when(wrapper.setIdempotent(idempotent)).thenReturn(wrapper);
 
-        TestIdempotentHandler spyHandler = spy(handler);
-
         // Act
-        spyHandler.execute(joinPoint, idempotent);
+        handler.execute(joinPoint, idempotent);
 
         // Assert here
-        verify(spyHandler).buildWrapper(joinPoint);
+        verify(handler).buildWrapper(joinPoint);
         verify(wrapper).setIdempotent(idempotent);
-        verify(spyHandler).handler(wrapper);
+        verify(handler).handler(wrapper);
     }
 
     static class TestIdempotentHandler extends AbstractIdempotentExecuteHandler {
