@@ -1,0 +1,27 @@
+# Ignore all Maven build output
+**/target/
+
+# IDE config
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Compiled files
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# Swap and temp files
+*.swp
+*.swo
+*.bak
+
+# Maven wrapper cache (optional)
+.mvn/wrapper/maven-wrapper.jar
