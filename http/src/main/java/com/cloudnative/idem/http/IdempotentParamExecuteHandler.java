@@ -2,10 +2,13 @@ package com.cloudnative.idem.http;
 
 import cn.hutool.crypto.digest.DigestUtil;
 import com.alibaba.fastjson2.JSON;
+import com.cloudnative.idem.core.context.IdempotentContext;
 import com.cloudnative.idem.core.handler.AbstractIdempotentExecuteHandler;
+import com.cloudnative.idem.core.param.IdempotentParamService;
 import com.cloudnative.idem.core.param.IdempotentParamWrapper;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,7 +16,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 @RequiredArgsConstructor
-public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHandler {
+public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentParamService {
     private final RedissonClient redissionClient;
     private final static String LOCK = "lock:param:restAPI";
 
@@ -46,6 +49,16 @@ public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHand
 
     @Override
     public void handler(IdempotentParamWrapper wrapper) {
+        String lockKey = wrapper.getLockKey();
+        RLock lock = redissionClient.getLock(lockKey);
+        if (!lock.tryLock()) {
+            throw new RuntimeException(wrapper.getIdempotent().message());
+        }
+        IdempotentContext.put(LOCK, lock);
+    }
 
+    @Override
+    public void postProcessing() {
+        super.postProcessing();
     }
 }
