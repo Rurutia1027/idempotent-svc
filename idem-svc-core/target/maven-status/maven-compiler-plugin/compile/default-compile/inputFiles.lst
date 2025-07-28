@@ -1,0 +1,12 @@
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/service/IdempotentSpELService.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/param/IdempotentParamService.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/context/ApplicationContextHolder.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/service/IdempotentSpELHTTPService.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/handler/IdempotentExecuteHandler.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/factory/IdempotentExecuteHandlerFactory.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/handler/AbstractIdempotentExecuteHandler.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/service/IdempotentTokenService.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/param/IdempotentParamWrapper.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/context/IdempotentContext.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/aspect/IdempotentAspect.java
+/Users/emma/Ireland-Job/idempotent-svc/idempotent-svc/idem-svc-core/src/main/java/com/cloudnative/idem/core/service/IdempotentSpELMQService.java
