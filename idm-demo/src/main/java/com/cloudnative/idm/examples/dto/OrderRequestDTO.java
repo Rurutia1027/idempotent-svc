@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class OrderRequestDTO {
-    private String username;
-    private String orderSn;
+    String userId;
+    String orderId;
+    Long timestamp;
 }
