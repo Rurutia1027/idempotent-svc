@@ -17,7 +17,7 @@ public abstract class AbstractIdempotentExecuteHandler implements IdempotentExec
      * @param joinPoint AOP method processor
      * @return idempotent parameter wrapper
      */
-    protected abstract AbstractIdempotentWrapper buildWrapper(ProceedingJoinPoint joinPoint);
+    public abstract AbstractIdempotentWrapper buildWrapper(ProceedingJoinPoint joinPoint);
 
     /**
      * Idempotent execute entry point.

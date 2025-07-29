@@ -1,7 +1,8 @@
-package com.cloudnative.apps.http;
+package com.cloudnative.apps.http.handler;
 
 import cn.hutool.crypto.digest.DigestUtil;
 import com.alibaba.fastjson2.JSON;
+import com.cloudnative.apps.http.IdempotentParamExecuteHandler;
 import com.cloudnative.idm.annotation.Idempotent;
 import com.cloudnative.idm.aspect.wrapper.IdempotentParamWrapper;
 import com.cloudnative.idm.enums.IdempotentTypeEnum;

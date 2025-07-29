@@ -24,7 +24,7 @@ public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHand
     private final static String LOCK = "lock:http:param";
 
     @Override
-    protected AbstractIdempotentWrapper buildWrapper(ProceedingJoinPoint joinPoint) {
+    public AbstractIdempotentWrapper buildWrapper(ProceedingJoinPoint joinPoint) {
         String lockKey = String.format("idempotent:path:%s:currentUserId:%s:md5:%s",
                 getServletPath(),
                 getCurrentUserId(),
