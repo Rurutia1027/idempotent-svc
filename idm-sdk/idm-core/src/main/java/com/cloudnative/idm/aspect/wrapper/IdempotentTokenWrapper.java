@@ -6,30 +6,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.SuperBuilder;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-public class IdempotentTokenWrapper {
-    /**
-     * Idempotent annotation metadata
-     */
-    private Idempotent idempotent;
-
-    /**
-     * Join point for AOP interception
-     */
-    private ProceedingJoinPoint joinPoint;
-
-    /**
-     * Lock key built using a token (e.g., from header or body).
-     * @see com.cloudnative.idm.enums.IdempotentTypeEnum#TOKEN
-     */
-    private String lockKey;
-
+public class IdempotentTokenWrapper extends AbstractIdempotentWrapper {
     /**
      * Raw token string extracted from request
      */

@@ -1,6 +1,7 @@
 package com.cloudnative.idm.aspect.handler;
 
 import com.cloudnative.idm.annotation.Idempotent;
+import com.cloudnative.idm.aspect.wrapper.AbstractIdempotentWrapper;
 import com.cloudnative.idm.aspect.wrapper.IdempotentParamWrapper;
 import org.aspectj.lang.ProceedingJoinPoint;
 
@@ -35,7 +36,7 @@ public interface IdempotentExecuteHandler {
      * @param wrapper encapsulated method context, includes arguments, idempotent
      *                annotation, Redis key, etc. ¬
      */
-    void handler(IdempotentParamWrapper wrapper);
+    void handler(AbstractIdempotentWrapper wrapper);
 
 
     /**

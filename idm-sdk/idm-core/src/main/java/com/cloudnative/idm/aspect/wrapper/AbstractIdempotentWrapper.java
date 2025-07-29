@@ -10,12 +10,24 @@ import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import org.aspectj.lang.ProceedingJoinPoint;
 
-/**
- * idempotent parameters wrapper
- */
 @Data
 @SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 @Accessors(chain = true)
-public class IdempotentParamWrapper extends AbstractIdempotentWrapper {
+public abstract class AbstractIdempotentWrapper {
+    /**
+     * idempotent annotation
+     */
+    public Idempotent idempotent;
 
+    /**
+     * AOP proceeding join point
+     */
+    public ProceedingJoinPoint joinPoint;
+
+    /**
+     * Lock {@link IdempotentTypeEnum}
+     */
+    public String lockKey;
 }
