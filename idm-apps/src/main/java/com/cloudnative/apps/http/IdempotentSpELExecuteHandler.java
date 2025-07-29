@@ -27,7 +27,7 @@ public class IdempotentSpELExecuteHandler extends AbstractIdempotentExecuteHandl
     private final static String LOCK = "lock:http:spel";
 
     @Override
-    protected AbstractIdempotentWrapper buildWrapper(ProceedingJoinPoint joinPoint) {
+    public AbstractIdempotentWrapper buildWrapper(ProceedingJoinPoint joinPoint) {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         Idempotent idempotent = method.getAnnotation(Idempotent.class);
 

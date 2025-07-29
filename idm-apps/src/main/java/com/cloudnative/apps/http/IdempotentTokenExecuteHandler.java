@@ -29,7 +29,7 @@ public class IdempotentTokenExecuteHandler extends AbstractIdempotentExecuteHand
 
 
     @Override
-    protected AbstractIdempotentWrapper buildWrapper(ProceedingJoinPoint joinPoint) {
+    public AbstractIdempotentWrapper buildWrapper(ProceedingJoinPoint joinPoint) {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         Idempotent idempotent = method.getAnnotation(Idempotent.class);
 
