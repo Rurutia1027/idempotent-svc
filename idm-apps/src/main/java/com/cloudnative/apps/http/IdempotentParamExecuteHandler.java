@@ -3,6 +3,7 @@ package com.cloudnative.apps.http;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cloudnative.idm.aspect.handler.AbstractIdempotentExecuteHandler;
+import com.cloudnative.idm.aspect.wrapper.AbstractIdempotentWrapper;
 import com.cloudnative.idm.aspect.wrapper.IdempotentParamWrapper;
 import com.cloudnative.idm.context.IdempotentContext;
 import com.cloudnative.idm.service.IdempotentParamService;
@@ -19,10 +20,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHandler
         implements IdempotentParamService {
     private final RedissonClient redissionClient;
-    private final static String LOCK = "lock:param:restAPI";
+    // lock:${idempotent-scene}:${idempotent-type}
+    private final static String LOCK = "lock:http:param";
 
     @Override
-    protected IdempotentParamWrapper buildWrapper(ProceedingJoinPoint joinPoint) {
+    protected AbstractIdempotentWrapper buildWrapper(ProceedingJoinPoint joinPoint) {
         String lockKey = String.format("idempotent:path:%s:currentUserId:%s:md5:%s",
                 getServletPath(),
                 getCurrentUserId(),
@@ -34,14 +36,6 @@ public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHand
         return DigestUtil.md5Hex(JSON.toJSONBytes(joinPoint.getArgs()));
     }
 
-    private String getCurrentUserId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            return "anonymous";
-        }
-        return auth.getName();
-    }
-
     private String getServletPath() {
         ServletRequestAttributes servletRequestAttributes =
                 (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -49,7 +43,7 @@ public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHand
     }
 
     @Override
-    public void handler(IdempotentParamWrapper wrapper) {
+    public void handler(AbstractIdempotentWrapper wrapper) {
         String lockKey = wrapper.getLockKey();
         RLock lock = redissionClient.getLock(lockKey);
         if (!lock.tryLock()) {

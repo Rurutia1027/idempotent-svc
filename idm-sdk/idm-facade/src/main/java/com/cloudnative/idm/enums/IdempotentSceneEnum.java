@@ -11,5 +11,7 @@ public enum IdempotentSceneEnum {
     /**
      * Message Queue based
      */
-    MQ
+    MQ,
+
+    DB
 }

@@ -1,8 +1,11 @@
 package com.cloudnative.idm.aspect.handler;
 
 import com.cloudnative.idm.annotation.Idempotent;
+import com.cloudnative.idm.aspect.wrapper.AbstractIdempotentWrapper;
 import com.cloudnative.idm.aspect.wrapper.IdempotentParamWrapper;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Abstract class for idempotent execute handler.
@@ -14,7 +17,7 @@ public abstract class AbstractIdempotentExecuteHandler implements IdempotentExec
      * @param joinPoint AOP method processor
      * @return idempotent parameter wrapper
      */
-    protected abstract IdempotentParamWrapper buildWrapper(ProceedingJoinPoint joinPoint);
+    protected abstract AbstractIdempotentWrapper buildWrapper(ProceedingJoinPoint joinPoint);
 
     /**
      * Idempotent execute entry point.
@@ -23,8 +26,14 @@ public abstract class AbstractIdempotentExecuteHandler implements IdempotentExec
      * @param idempotent idempotent annotation
      */
     public void execute(ProceedingJoinPoint joinPoint, Idempotent idempotent) {
-        IdempotentParamWrapper idempotentParamWrapper =
+        AbstractIdempotentWrapper idempotentParamWrapper =
                 buildWrapper(joinPoint).setIdempotent(idempotent);
         handler(idempotentParamWrapper);
+    }
+
+
+    protected String getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return (auth == null || !auth.isAuthenticated()) ? "anonymous" : auth.getName();
     }
 }
