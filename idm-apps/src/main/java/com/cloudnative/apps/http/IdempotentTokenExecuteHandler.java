@@ -33,7 +33,7 @@ public class IdempotentTokenExecuteHandler extends AbstractIdempotentExecuteHand
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         Idempotent idempotent = method.getAnnotation(Idempotent.class);
 
-        if (idempotent == null || idempotent.type() != IdempotentTypeEnum.SPEL) {
+        if (idempotent == null || idempotent.type() != IdempotentTypeEnum.TOKEN) {
             throw new IllegalStateException("Missing or invalid @Idempotent(type=SPEL) " +
                     "annotation");
         }
