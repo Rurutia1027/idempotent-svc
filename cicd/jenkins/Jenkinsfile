@@ -1,0 +1,52 @@
+pipeline {
+	agent any
+
+    environment {
+		JAVA_HOME = tool(name: 'jdk-17')
+        MAVEN_HOME = tool(name: 'maven-3.9')
+        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
+    }
+
+    stages {
+		stage('Checkout') {
+			steps {
+				checkout scm
+            }
+        }
+
+        stage('Build SDK') {
+			steps {
+				dir('idm-sdk') {
+					sh 'mvn clean install -DskipTests=false'
+                }
+            }
+        }
+
+        stage('Build Apps') {
+			steps {
+				dir('idm-apps') {
+					sh 'mvn clean install -DskipTests=false'
+                }
+            }
+        }
+
+        stage('Build Demo') {
+			steps {
+				dir('idm-demo') {
+					sh 'mvn clean package -DskipTests'
+                }
+            }
+        }
+    }
+
+    post {
+		always {
+			junit '**/target/surefire-reports/*.xml'
+        }
+        failure {
+			mail to: 'devops@yourdomain.com',
+                 subject: "Build failed for ${env.JOB_NAME}",
+                 body: "Please check the Jenkins logs."
+        }
+    }
+}
